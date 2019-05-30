@@ -5,7 +5,15 @@ const app = express();
 app.get('/', (req, res) => {
   res.send('Hello div World!');
 });
-
+app.get('/zadacha1', (req, res) => {
+  const getSecondsToday = () => {
+    const dat = new Date();
+    const today = new Date(dat.getFullYear(), dat.getMonth(), dat.getDate() + 1);
+    const diff = today - dat;
+    return Math.floor(diff / 1000);
+  };
+  console.log(getSecondsToday());
+});
 app.get('/tasks', (req, res) => {
   const tasks = [
     {
