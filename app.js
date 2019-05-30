@@ -12,7 +12,8 @@ app.get('/zadacha1', (req, res) => {
     const diff = today - dat;
     return Math.floor(diff / 1000);
   };
-  console.log(getSecondsToday());
+  const la = console.log(getSecondsToday());
+  res.send(la);
 });
 app.get('/tasks', (req, res) => {
   const tasks = [
