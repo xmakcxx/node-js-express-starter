@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require('express');
 
 const app = express();
@@ -5,6 +6,15 @@ const app = express();
 app.get('/', (req, res) => {
   res.send('Hello div World!');
 });
+app.get('/tichen1',(req, res) =>{
+  // eslint-disable-next-line global-require
+  const counter = require('./Yrok');
+
+  console.log(counter([1, 6, 99, 8, 45, 8]));
+  res.send('HeLoo lex');
+
+});
+
 app.get('/zadacha1', (req, res) => {
   const getSecondsToday = () => {
     const dat = new Date();
