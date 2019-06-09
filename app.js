@@ -9,9 +9,10 @@ app.get('/', (req, res) => {
 
 app.get('/tichen1', (req, res) => {
   // eslint-disable-next-line global-require
-  const counter = require('./Yrok');
+  const things = require('./things');
 
-  console.log(counter([1, 6, 99, 8, 45, 8]));
+  console.log(things.array_c([1, 6, 99, 8, 45, 8]));
+  console.log(things.mlt);
   res.send('HeLoo lex');
 });
 app.get('/zadacha1', (req, res) => {
