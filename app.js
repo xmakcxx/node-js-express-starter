@@ -3,23 +3,20 @@ const express = require('express');
 // eslint-disable-next-line no-unused-vars
 const events = require('events');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 
 const app = express();
-const tasks = [
-  {
-    _id: Math.random(),
-    name: Math.random()
-  }];
+let tasks = [];
 app.use(bodyParser.json());
 app.get('/', (req, res) => {
   res.send('Hello div World!');
 });
 app.get('/iven', (req, res) => {
-  const myEmit = new events.EventEmitter();
-  myEmit.on('some_event', (text) => {
-    console.log(text);
+  // eslint-disable-next-line global-require
+
+  fs.readFile('temp.txt', (err, buf) => {
+    console.log(buf.toString());
   });
-  myEmit.emit('some_event', 'Обрабочтик событий сработал');
 
   res.send('Hello div World!');
 });
@@ -49,37 +46,49 @@ app.post('/task', (req, res) => {
     name: body.name,
     age: body.age,
   });
-  res.send(JSON.stringify(tasks));
+  return fs.writeFile('temp.txt', JSON.stringify(tasks), (err) => {
+    if (err) console.log(err);
+    res.send(JSON.stringify(tasks));
+    console.log('Successfully Written to File.{a [');
+  });
 });
 app.get('/tasks', (req, res) => {
   res.send(JSON.stringify(tasks));
 });
 app.get('/task/:id', (req, res) => {
-  console.log("start");
+  console.log('start');
   const { id } = req.params;
+  // eslint-disable-next-line no-shadow
   const task = tasks.find(task => task._id.toString() === id);
   res.send(JSON.stringify(task));
 });
 app.delete('/tasks/:id', (req, res) => {
   const { id } = req.params;
+  // eslint-disable-next-line no-shadow
   const task = tasks.find(task => task._id.toString() === id);
   const kid = Math.floor(task._id);
   tasks.splice(kid, 1);
-   res.send(JSON.stringify(task));
+  res.send(JSON.stringify(task));
 });
 app.put('/task/:id', (req, res) => {
-  console.log("start");
+  console.log('start');
   const { id } = req.params;
-  const task= tasks.find(task => task._id.toString() === id);
+  // eslint-disable-next-line no-shadow
+  const task = tasks.find(task => task._id.toString() === id);
   const { body } = req;
   const note = {
     name: body.name,
     age: body.age,
-   };
-   task.name = note.name;
-   task.age = note.age;
+  };
+  task.name = note.name;
+  task.age = note.age;
   res.send(JSON.stringify(note));
 });
-app.listen(3000, () => {
-  console.log('Example app listening on port 3000!');
+fs.readFile('temp.txt', (err, data) => {
+  if (err) throw err;
+  tasks = JSON.parse(data);
+  console.log(data);
+  app.listen(3000, () => {
+    console.log('Example app listening on port 3000!');
+  });
 });
