@@ -1,13 +1,20 @@
-
 const express = require('express');
 // eslint-disable-next-line no-unused-vars
 const events = require('events');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const uuidv4 = require('uuid/v4');
 
 const app = express();
 let tasks = [];
 app.use(bodyParser.json());
+
+app.all('*', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+  next();
+});
+
 app.get('/', (req, res) => {
   res.send('Hello div World!');
 });
@@ -42,9 +49,9 @@ app.get('/zadacha1', (req, res) => {
 app.post('/task', (req, res) => {
   const { body } = req;
   tasks.push({
-    _id: (tasks[tasks.length - 1]._id + 1),
-    name: body.name,
-    age: body.age,
+    _id: uuidv4(),
+    title: body.title,
+    author: body.author,
   });
   return fs.writeFile('temp.txt', JSON.stringify(tasks), (err) => {
     if (err) console.log(err);
