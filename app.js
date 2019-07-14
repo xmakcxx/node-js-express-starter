@@ -1,101 +1,60 @@
 const express = require('express');
-// eslint-disable-next-line no-unused-vars
-const events = require('events');
+const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const uuidv4 = require('uuid/v4');
+const createError = require('http-errors');
+const rootRouter = require('./app/routes');
 
 const app = express();
-let tasks = [];
-app.use(bodyParser.json());
+app.use(morgan((tokens, req, res) => {
+  const method = tokens.method(req, res);
+  const status = Number(tokens.status(req, res));
+  const statusFinal = status;
+  const url = tokens.url(req, res);
+  const resTime = Number(tokens['response-time'](req, res, 'digits'));
+  const resTimeFinal = resTime;
+  const date = tokens.date(req, res, 'iso');
+  const httpVersion = tokens['http-version'](req, res);
+  const referrer = tokens.referrer(req, res);
+  const remoteAddr = tokens['remote-addr'](req, res);
+  const contentLength = Number(tokens.res(req, res, 'content-length'));
+  const contentLengthFinal = contentLength;
+  const userAgent = tokens['user-agent'](req, res);
 
-app.all('*', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
-  next();
+  const morganData = [
+    `"method":"${method}"`,
+    `"status":${statusFinal}`,
+    `"url":"${url}"`,
+    `"response-time":${resTimeFinal}`,
+    `"timestamp":"${date}"`,
+    `"http-version":"${httpVersion}"`,
+    `"referrer":"${referrer}"`,
+    `"remote-addr":"${remoteAddr}"`,
+    `"content-length":${contentLengthFinal}`,
+    `"user-agent":"${userAgent}"`,
+  ].join(',');
+  return `{ ${morganData} }`;
+}));
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ extended: false, limit: '100mb' }));
+app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '100Mb' }));
+app.disable('etag');
+
+rootRouter.init(app);
+
+// catch 404 and forward to error handler
+app.use((req, res, next) => {
+  next(createError(404));
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello div World!');
-});
-app.get('/iven', (req, res) => {
-  // eslint-disable-next-line global-require
+// error handler
+app.use((err, req, res) => {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  fs.readFile('temp.txt', (err, buf) => {
-    console.log(buf.toString());
-  });
-
-  res.send('Hello div World!');
-});
-app.get('/tichen1', (req, res) => {
-  // eslint-disable-next-line global-require
-  const things = require('./things');
-
-  console.log(things.array_c([1, 6, 99, 8, 45, 8]));
-  console.log(things.mlt);
-  res.send('HeLoo lex');
-});
-app.get('/zadacha1', (req, res) => {
-  const getSecondsToday = () => {
-    const dat = new Date();
-    const today = new Date(dat.getFullYear(), dat.getMonth(), dat.getDate() + 1);
-    const diff = today - dat;
-    return Math.floor(diff / 1000);
-  };
-  const la = console.log(getSecondsToday());
-  res.send(la);
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
 
-app.post('/task', (req, res) => {
-  const { body } = req;
-  tasks.push({
-    _id: uuidv4(),
-    title: body.title,
-    author: body.author,
-  });
-  return fs.writeFile('temp.txt', JSON.stringify(tasks), (err) => {
-    if (err) console.log(err);
-    res.send(JSON.stringify(tasks));
-    console.log('Successfully Written to File.{a [');
-  });
-});
-app.get('/tasks', (req, res) => {
-  res.send(JSON.stringify(tasks));
-});
-app.get('/task/:id', (req, res) => {
-  console.log('start');
-  const { id } = req.params;
-  // eslint-disable-next-line no-shadow
-  const task = tasks.find(task => task._id.toString() === id);
-  res.send(JSON.stringify(task));
-});
-app.delete('/tasks/:id', (req, res) => {
-  const { id } = req.params;
-  // eslint-disable-next-line no-shadow
-  const task = tasks.find(task => task._id.toString() === id);
-  const kid = Math.floor(task._id);
-  tasks.splice(kid, 1);
-  res.send(JSON.stringify(task));
-});
-app.put('/task/:id', (req, res) => {
-  console.log('start');
-  const { id } = req.params;
-  // eslint-disable-next-line no-shadow
-  const task = tasks.find(task => task._id.toString() === id);
-  const { body } = req;
-  const note = {
-    name: body.name,
-    age: body.age,
-  };
-  task.name = note.name;
-  task.age = note.age;
-  res.send(JSON.stringify(note));
-});
-fs.readFile('temp.txt', (err, data) => {
-  if (err) throw err;
-  tasks = JSON.parse(data);
-  console.log(data);
-  app.listen(3000, () => {
-    console.log('Example app listening on port 3000!');
-  });
-});
+module.exports = app;
