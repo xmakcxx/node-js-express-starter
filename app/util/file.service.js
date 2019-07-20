@@ -7,7 +7,7 @@ class FileService {
     console.log('this.filePath', this.filePath);
   }
 
-  getTasks() {
+  getFileContent() {
     console.log('__dirname', __dirname);
 
     const fileData = fs.readFileSync(this.filePath, 'utf8');

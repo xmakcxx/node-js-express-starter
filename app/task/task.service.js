@@ -6,7 +6,7 @@ class ReportingService {
   }
 
   getTasks() {
-    return this.fileService.getTasks();
+    return this.fileService.getFileContent();
   }
 }
 
