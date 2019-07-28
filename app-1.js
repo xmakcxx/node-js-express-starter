@@ -56,14 +56,15 @@ app.get('/zadacha1', (req, res) => {
 
 app.post('/task', (req, res) => {
   const { body } = req;
-  tasks.push({
+  const task = {
     _id: uuidv4(),
     title: body.title,
     author: body.author,
-  });
+  };
+  tasks.push(task);
   return fs.writeFile('temp.txt', JSON.stringify(tasks), (err) => {
     if (err) console.log(err);
-    res.send(JSON.stringify(tasks));
+    res.send(JSON.stringify(task));
     console.log('Successfully Written to File.{a [');
   });
 });
