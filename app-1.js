@@ -77,7 +77,7 @@ app.get('/task/:id', (req, res) => {
   const task = tasks.find(task => task._id.toString() === id);
   res.send(JSON.stringify(task));
 });
-app.delete('/tasks/:id', (req, res) => {
+app.delete('/task/:id', (req, res) => {
   const { id } = req.params;
   // eslint-disable-next-line no-shadow
   const task = tasks.find(task => task._id.toString() === id);
